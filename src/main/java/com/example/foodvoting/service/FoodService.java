@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,7 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FoodService {
     private final FoodRepository foodRepository;
-    private final Path uploadDir = Paths.get("uploads");
+    private final Path uploadDir = Paths.get("uploads").toAbsolutePath().normalize();
 
     public List<Food> findAllFoods() {
         return foodRepository.findAll();
@@ -87,9 +86,11 @@ public class FoodService {
 
         try {
             Files.createDirectories(uploadDir);
-            String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
-            File saveFile = uploadDir.resolve(fileName).toFile();
-            imageFile.transferTo(saveFile);
+            String originalName = imageFile.getOriginalFilename();
+            String safeName = (originalName == null || originalName.isBlank()) ? "image" : originalName;
+            String fileName = UUID.randomUUID() + "_" + safeName.replaceAll("[^a-zA-Z0-9._-]", "_");
+            Path destination = uploadDir.resolve(fileName);
+            imageFile.transferTo(destination);
             return fileName;
         } catch (IOException e) {
             throw new RuntimeException("Image upload failed.", e);
