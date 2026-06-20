@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Food Voting</title>
+    <style>
+        :root {
+            --primary: #4834d4;
+            --secondary: #f0932b;
+            --dark: #130f40;
+            --light: #f4f7f6;
+            --white: #ffffff;
+            --shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--primary), #686de0);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: var(--white);
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 420px;
+        }
+        h1 { color: var(--primary); margin-bottom: 8px; }
+        p { color: #666; margin-bottom: 24px; }
+        .form-grid { display: grid; gap: 14px; }
+        input, .btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+        }
+        .btn {
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            background: var(--primary);
+            color: white;
+        }
+        .alert {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+        }
+        .alert-error { background: #ffe3e3; color: #c0392b; }
+        .alert-success { background: #e8f8e8; color: #27ae60; }
+        .footer-link {
+            margin-top: 20px;
+            text-align: center;
+            color: #666;
+        }
+        .footer-link a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>Welcome Back</h1>
+    <p>Log in to vote and manage food entries.</p>
+
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+    <form th:action="@{/login}" method="post" class="form-grid">
+        <input type="text" name="username" placeholder="Username" required autofocus>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit" class="btn">Login</button>
+    </form>
+
+    <div class="footer-link">
+        No account? <a th:href="@{/register}">Sign up</a>
+        &nbsp;|&nbsp;
+        <a th:href="@{/}">Back to home</a>
+    </div>
+</div>
+</body>
+</html>

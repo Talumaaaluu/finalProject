@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Voting App</title>
+    <style>
+        :root {
+            --primary: #4834d4;
+            --secondary: #f0932b;
+            --success: #6ab04c;
+            --danger: #eb4d4b;
+            --dark: #130f40;
+            --light: #f4f7f6;
+            --white: #ffffff;
+            --shadow: 0 10px 25px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            padding: 20px;
+        }
+
+        .top-nav {
+            max-width: 1400px;
+            margin: 0 auto 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .top-nav h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-actions span {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        .sidebar {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            align-content: start;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .winner-card {
+            border: 3px solid #ffd700;
+            text-align: center;
+            background: linear-gradient(to bottom, #fff, #fff9e6);
+        }
+
+        .winner-card h2 { color: var(--secondary); margin-bottom: 15px; font-size: 1.2rem; }
+
+        .winner-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .form-grid, .search-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .search-grid {
+            grid-template-columns: 1fr auto auto;
+        }
+
+        @media (max-width: 600px) {
+            .search-grid { grid-template-columns: 1fr; }
+        }
+
+        input, .btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+        }
+
+        .btn {
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-secondary { background: #eee; color: #333; }
+        .btn-sm { padding: 8px 12px; font-size: 0.9rem; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .food-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .food-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: grid;
+            grid-template-rows: 180px 1fr;
+        }
+
+        .food-card:hover { transform: translateY(-5px); }
+
+        .food-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-info {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .vote-count {
+            display: inline-block;
+            background: #eee;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: var(--primary);
+        }
+
+        .card-actions {
+            display: grid;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .empty-state {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            color: #666;
+            box-shadow: var(--shadow);
+        }
+
+        .guest-note {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <h1>Food Voting</h1>
+    <div class="nav-actions">
+        <span sec:authorize="isAuthenticated()">
+            Hello, <span sec:authentication="name">User</span>!
+        </span>
+        <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn btn-primary btn-sm">Login</a>
+        <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn btn-secondary btn-sm">Sign Up</a>
+        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
+            <button type="submit" class="btn btn-secondary btn-sm">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <aside class="sidebar">
+        <div th:if="${winnerFood != null}" class="card winner-card">
+            <h2>TOP CHAMPION</h2>
+            <img th:if="${winnerFood.imageName != null}"
+                 th:src="@{'/uploads/' + ${winnerFood.imageName}}" class="winner-img" alt="Winner">
+            <h3 th:text="${winnerFood.name}">Winner Name</h3>
+            <p class="vote-count"><span th:text="${winnerFood.voteCount}">0</span> Votes</p>
+        </div>
+
+        <div class="card" sec:authorize="isAuthenticated()">
+            <h2 style="margin-bottom: 15px; font-size: 1.1rem;">Add New Entry</h2>
+            <form th:action="@{/food/add}" method="post" enctype="multipart/form-data" class="form-grid">
+                <input type="text" name="name" placeholder="Food Name" required>
+                <input type="file" name="image" accept="image/*" required>
+                <button type="submit" class="btn btn-primary">Submit Nominee</button>
+            </form>
+        </div>
+
+        <div class="card" sec:authorize="!isAuthenticated()">
+            <h2 style="margin-bottom: 10px; font-size: 1.1rem;">Want to participate?</h2>
+            <p class="guest-note">Log in or sign up to add food entries, vote, edit, and delete nominees.</p>
+            <div class="card-actions" style="margin-top: 16px;">
+                <a th:href="@{/login}" class="btn btn-primary">Login</a>
+                <a th:href="@{/register}" class="btn btn-secondary">Sign Up</a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="card">
+            <h2 style="margin-bottom: 15px; border-left: 5px solid var(--primary); padding-left: 10px;">Search Candidates</h2>
+            <form th:action="@{/}" method="get" class="search-grid">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search by food name...">
+                <button type="submit" class="btn btn-primary">Search</button>
+                <a th:href="@{/}" class="btn btn-secondary">Clear</a>
+            </form>
+        </div>
+
+        <div th:if="${foods.isEmpty()}" class="empty-state">
+            <h3>No food entries found</h3>
+            <p th:if="${keyword != null and !keyword.isEmpty()}">
+                No results for "<span th:text="${keyword}"></span>". Try another keyword.
+            </p>
+            <p th:if="${keyword == null or keyword.isEmpty()}">
+                Be the first to add a nominee after logging in.
+            </p>
+        </div>
+
+        <div th:if="${!foods.isEmpty()}" class="food-gallery">
+            <div th:each="food : ${foods}" class="food-card">
+                <img th:if="${food.imageName != null}"
+                     th:src="@{'/uploads/' + ${food.imageName}}" alt="Food Image">
+                <div class="card-info">
+                    <h3 th:text="${food.name}">Food Name</h3>
+                    <p class="vote-count"><span th:text="${food.voteCount}">0</span> Votes</p>
+
+                    <div class="card-actions" sec:authorize="isAuthenticated()">
+                        <form th:action="@{/food/vote}" method="post">
+                            <input type="hidden" name="id" th:value="${food.id}">
+                            <button type="submit" class="btn btn-success">Vote Now</button>
+                        </form>
+                        <a th:href="@{'/food/edit/' + ${food.id}}" class="btn btn-secondary btn-sm">Edit</a>
+                        <form th:action="@{/food/delete}" method="post"
+                              onsubmit="return confirm('Delete this food entry?');">
+                            <input type="hidden" name="id" th:value="${food.id}">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

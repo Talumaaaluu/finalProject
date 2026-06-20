@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Food | Food Voting</title>
+    <style>
+        :root {
+            --primary: #4834d4;
+            --white: #ffffff;
+            --shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f4f7f6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: var(--white);
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 480px;
+        }
+        h1 { color: var(--primary); margin-bottom: 8px; }
+        p { color: #666; margin-bottom: 20px; }
+        .preview {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        .form-grid { display: grid; gap: 14px; }
+        input, .btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+        }
+        .btn {
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            background: var(--primary);
+            color: white;
+        }
+        .btn-secondary {
+            display: inline-block;
+            text-align: center;
+            background: #eee;
+            color: #333;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>Edit Food Entry</h1>
+    <p>Update the name or replace the image.</p>
+
+    <img th:if="${food.imageName != null}"
+         th:src="@{'/uploads/' + ${food.imageName}}"
+         class="preview" alt="Current food image">
+
+    <form th:action="@{/food/update}" method="post" enctype="multipart/form-data" class="form-grid">
+        <input type="hidden" name="id" th:value="${food.id}">
+        <input type="text" name="name" th:value="${food.name}" placeholder="Food Name" required>
+        <input type="file" name="image" accept="image/*">
+        <small style="color:#666;">Leave image empty to keep the current photo.</small>
+        <button type="submit" class="btn">Save Changes</button>
+    </form>
+
+    <a th:href="@{/}" class="btn btn-secondary">Cancel</a>
+</div>
+</body>
+</html>
